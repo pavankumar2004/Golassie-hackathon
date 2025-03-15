@@ -19,6 +19,7 @@ def about() -> dict[str, str]:
 # Route to add a message
 @app.post("/messages/{msg_name}/")
 def add_msg(msg_name: str) -> dict[str, MsgPayload]:
+    # Generate an ID for the item based on the highest ID in the messages_list
     msg_id = max(messages_list.keys()) + 1 if messages_list else 0
     messages_list[msg_id] = MsgPayload(msg_id=msg_id, msg_name=msg_name)
 

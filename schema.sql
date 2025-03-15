@@ -1,7 +1,7 @@
 --  Payer_Groups Table
 CREATE TABLE payer_groups (
-    payer_group_id SERIAL PRIMARY KEY,  -- Unique identifier for each payer group 
-    payer_group_name VARCHAR(255) NOT NULL UNIQUE  -- Name of the payer group (e.g., "Delta Dental")
+    payer_group_id SERIAL PRIMARY KEY,              -- Unique identifier for each payer group 
+    payer_group_name VARCHAR(255) NOT NULL UNIQUE   -- Name of the payer group (e.g., "Delta Dental")
 );
 
 -- Payers Table

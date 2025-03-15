@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Edit Payer Detail</h2>
+<form method="POST">
+    <div class="form-group">
+        <label for="payer_name">Payer Name</label>
+        <input type="text" class="form-control" id="payer_name" name="payer_name" value="{{ payer_detail[1] }}" required>
+    </div>
+    <div class="form-group">
+        <label for="payer_number">Payer Number</label>
+        <input type="text" class="form-control" id="payer_number" name="payer_number" value="{{ payer_detail[2] }}" required>
+    </div>
+    <div class="form-group">
+        <label for="tax_id">Tax ID</label>
+        <input type="text" class="form-control" id="tax_id" name="tax_id" value="{{ payer_detail[3] }}">
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+{% endblock %}

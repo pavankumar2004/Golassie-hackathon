@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Payer Groups</h2>
+<a href="{{ url_for('add_payer_group') }}" class="btn btn-primary mb-3">Add New Payer Group</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Payer Group ID</th>
+            <th>Payer Group Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in payer_groups %}
+        <tr>
+            <td>{{ group[0] }}</td>
+            <td>{{ group[1] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

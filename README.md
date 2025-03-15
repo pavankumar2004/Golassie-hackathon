@@ -2,18 +2,14 @@
 
 A Flask-based web application for managing healthcare payer information, including payer groups, payers, and payer details.
 
-## Features
+## 🚀 Features
 
+- DB Scan Clustering for Payer Group Clustering
 - View and manage payer groups
 - View and edit payer details
 - Fuzzy matching for payer identification
 - Database integration with PostgreSQL
 - Data extraction and clustering from multiple sources
-- DB Scan Clustering for Payer Group Clustering.
-
-## Database Schema
-
-![Database ERD](erd.png)
 
 ## 🏛 Database Schema
 
@@ -22,92 +18,99 @@ Manages payer groups.
 
 | Column Name       | Data Type      | Constraints       | Description |
 |-------------------|---------------|------------------|-------------|
-| `payer_group_id`  | `SERIAL`       | `PRIMARY KEY`    | Unique ID for each payer group. |
-| `payer_group_name` | `VARCHAR(255)` | `UNIQUE, NOT NULL` | Name of the payer group. |
-
----
+| `payer_group_id`  | `SERIAL`      | `PRIMARY KEY`    | Unique ID for each payer group |
+| `payer_group_name`| `VARCHAR(255)`| `UNIQUE, NOT NULL`| Name of the payer group |
 
 ### 📌 `payers` Table
 Stores payer information.
 
-| Column Name       | Data Type      | Constraints       | Description |
-|-------------------|---------------|------------------|-------------|
-| `payer_id`       | `SERIAL`       | `PRIMARY KEY`    | Unique ID for each payer. |
-| `payer_group_id` | `INT`          | `FOREIGN KEY` (payer_groups) | Links payer to a payer group. |
-| `payer_name`     | `VARCHAR(255)` | `NOT NULL`       | Name of the payer. |
-| `payer_number`   | `VARCHAR(255)` | `NOT NULL, UNIQUE` | Unique payer number. |
-| `tax_id`         | `VARCHAR(255)` | `NULLABLE`       | Optional tax identifier. |
-
----
+| Column Name      | Data Type      | Constraints       | Description |
+|-----------------|---------------|------------------|-------------|
+| `payer_id`      | `VARCHAR(255)`| `PRIMARY KEY`    | Unique ID for each payer |
+| `payer_group_id`| `INT`         | `FOREIGN KEY`    | References payer_groups(payer_group_id) |
+| `payer_name`    | `VARCHAR(255)`| `NOT NULL`       | Name of the payer |
 
 ### 📌 `payer_details` Table
-Stores additional details about each payer.
+Stores additional payer information.
 
-| Column Name       | Data Type      | Constraints       | Description |
-|-------------------|---------------|------------------|-------------|
-| `payer_detail_id` | `SERIAL`       | `PRIMARY KEY`    | Unique ID for each payer detail. |
-| `payer_id`        | `INT`          | `FOREIGN KEY` (payers) | Links to a payer. |
-| `payer_name`      | `VARCHAR(255)` | `NOT NULL`       | Payer name. |
-| `payer_number`    | `VARCHAR(255)` | `NOT NULL`       | Payer number. |
-| `tax_id`          | `VARCHAR(255)` | `NULLABLE`       | Optional tax ID. |
-| `source_id`       | `VARCHAR(255)` | `NULLABLE`       | Source identifier (if applicable). |
+| Column Name      | Data Type      | Constraints    | Description |
+|-----------------|---------------|---------------|-------------|
+| `payer_detail_id`| `SERIAL`      | `PRIMARY KEY` | Unique ID for each detail record |
+| `payer_id`      | `VARCHAR(255)`| `FOREIGN KEY` | References payers(payer_id) |
+| `payer_name`    | `VARCHAR(255)`| -             | Payer name in this context |
+| `short_name`    | `VARCHAR(100)`| -             | Short/abbreviated name |
+| `tax_id`        | `VARCHAR(255)`| -             | Tax identifier |
 
----
+## 🔗 Entity Relationships
 
-## 🔗 Relationships
-1. **One-to-Many:** Each **payer group** (`payer_groups`) can have multiple **payers** (`payers`).
-2. **One-to-Many:** Each **payer** (`payers`) can have multiple **payer details** (`payer_details`).
+![ER Diagram](erdiagram.png)
 
----
+## 🛠 Setup
 
-## Setup
-
-1. Create a virtual environment:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
+1. Clone the repository
 2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+3. Set up PostgreSQL database
+4. Configure environment variables:
+```bash
+export DATABASE_URL="postgresql://username:password@host:port/dbname"
+```
+5. Run the insertion scripts one by one
+    db.py
+    insert_player.py
+    inerter_player_details.py
 
-3. Set up PostgreSQL database using schema.sql
+## 🚀 Running the Application
 
-4. Run the application:
 ```bash
 python app.py
 ```
-
-## Data Processing Pipeline
-
-1. Extract payer data: `python extract.py`
-2. Initialize payer groups: `python db.py`
-3. Insert payers: `python insert_payer.py`
-4. Insert payer details: `python insert_payer_details.py`
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-.
-├── app.py                  # Flask application
-├── db.py                   # Database initialization
-├── extract.py             # Data extraction script
-├── insert_payer.py        # Payer insertion script
+golassie-hackathon/
+├── app.py                 # Main Flask application
+├── db.py                  # Database connection and setup
+├── extract.py            # Data extraction utilities
+├── insert_payer.py       # Payer insertion logic
 ├── insert_payer_details.py # Payer details insertion
-├── schema.sql             # Database schema
-├── requirements.txt       # Project dependencies
-└── templates/             # HTML templates
-    ├── base.html
-    ├── home.html
+├── requirements.txt      # Project dependencies
+├── schema.sql           # Database schema
+├─ erdiagram.png         # Entity Relationship Diagram
+└── templates/
+    ├── base.html        # Base template
+    ├── home.html        # Home page
     ├── payer_groups.html
-    └── payer_details.html
+    ├── payers.html
+    ├── payer_details.html
+    ├── payer_detail.html
+    ├── edit_payer_detail.html
+    ├── add_payer_group.html
+    └── hierarchy.html
 ```
+## 📝 API Endpoints
 
-## Environment Variables
+- `GET /payer_groups`: List all payer groups
+- `POST /payer_groups/add`: Add new payer group
+- `GET /payers`: List all payers
+- `GET /payer_details`: View payer details
+- `POST /payer_details/edit/<id>`: Edit payer details
 
-Store your database credentials in a `.env` file:
-```
-DATABASE_URL=postgresql://username:password@host:port/database
-```
+
+
+## 📦 Dependencies
+
+- Flask 2.0.1
+- PostgreSQL (psycopg2-binary 2.9.3)
+- pandas 1.4.0
+- scikit-learn 1.0.2
+- fuzzywuzzy 0.18.0
+
+
+
+## 📄 License
+
+This project is licensed under the MIT License.
+````

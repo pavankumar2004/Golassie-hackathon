@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Payers</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Payer ID</th>
+                <th>Payer Name</th>
+                <th>Payer Group</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payer in payers %}
+            <tr>
+                <td>{{ payer[0] }}</td>
+                <td>{{ payer[1] }}</td>
+                <td>{{ payer[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

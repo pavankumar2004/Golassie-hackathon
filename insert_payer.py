@@ -1,63 +1,71 @@
 import psycopg2
 import pandas as pd
+from fuzzywuzzy import fuzz, process
 
-# Database connection
 DATABASE_URL = "postgresql://postgres:golassie@db.cbgtocxhyfflpmaxbugd.supabase.co:5432/postgres"
 conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
-# Load the prepared DataFrame (payer_with_payer_group.xlsx)
 all_payers_df = pd.read_excel("payer_with_payer_group.xlsx")
 
-def insert_payer(payer_id, payer_group_name, payer_name, conn):
-    # Fetch payer group ID for the given payer group name
+cursor.execute("SELECT payer_id, payer_name FROM payers")
+existing_payers = cursor.fetchall()
+existing_payer_dict = {payer_name: payer_id for payer_id, payer_name in existing_payers}
+
+def find_best_match(new_payer_name):
+    if not existing_payer_dict:
+        return None, 0  
+    best_match, score = process.extractOne(new_payer_name, existing_payer_dict.keys(), scorer=fuzz.token_sort_ratio)
+    return (existing_payer_dict[best_match], score) if score >= 85 else (None, score)
+
+def insert_payer(payer_group_name, payer_name, payer_number, conn):
+    print(f"\nProcessing Payer: {payer_name}, Group: {payer_group_name}, Number: {payer_number}")
+
     cursor.execute("SELECT payer_group_id FROM payer_groups WHERE payer_group_name = %s", (payer_group_name,))
     payer_group_id = cursor.fetchone()
 
-    if payer_group_id:
-        payer_group_id = payer_group_id[0]  # Extract payer group ID
-    else:
-        print(f"Error: Payer Group '{payer_group_name}' not found.")
-        return
+    if not payer_group_id:
+        print(f"Error: Payer Group '{payer_group_name}' not found. Skipping...")
+        return None
+    payer_group_id = payer_group_id[0]
 
-    # Check if a payer with the same name and payer group already exists
-    cursor.execute("""
-        SELECT payer_id, payer_name, payer_number 
-        FROM payers 
-        WHERE payer_group_id = %s AND payer_name = %s
-    """, (payer_group_id, payer_name))
-    
-    existing_payers = cursor.fetchall()
+    cursor.execute("SELECT payer_id FROM payers WHERE payer_id = %s", (payer_number,))
+    existing_payer = cursor.fetchone()
 
-    # If a payer with the same name exists but different payer number, do not insert
-    for existing_payer in existing_payers:
-        existing_payer_id, existing_payer_name, existing_payer_number = existing_payer
-        if existing_payer_number != "NULL":  # Only skip if the payer number is different
-            print(f"⚠️ Payer '{payer_name}' already exists with a different payer number. Skipping insertion.")
-            return existing_payer_id
+    if existing_payer:
+        print(f"ℹ️ Payer '{payer_name}' already exists with payer_id '{payer_number}'. Skipping...")
+        return payer_number
 
-    # Insert the new payer only if it doesn't already exist
-    cursor.execute("""
-        INSERT INTO payers (payer_group_id, payer_name, payer_number) 
-        VALUES (%s, %s, NULL) RETURNING payer_id
-    """, (payer_group_id, payer_name))
+    matched_payer_id, similarity_score = find_best_match(payer_name)
 
-    payer_id = cursor.fetchone()[0]  # Get the inserted payer_id
+    if matched_payer_id:
+        print(f"Similar Payer Found: '{payer_name}' matches existing payer_id '{matched_payer_id}' with {similarity_score}% similarity. Using existing payer_id.")
+        return matched_payer_id  
+
+    cursor.execute(
+        """
+        INSERT INTO payers (payer_id, payer_group_id, payer_name) 
+        VALUES (%s, %s, %s)
+        """,
+        (payer_number, payer_group_id, payer_name)
+    )
     conn.commit()
-    print(f"✅ Payer '{payer_name}' inserted with payer_id {payer_id}.")
-    return payer_id
+    print(f" Payer '{payer_name}' inserted successfully with payer_id {payer_number}.")
+    
+    existing_payer_dict[payer_name] = payer_number
+    return payer_number
 
-# Iterate over the DataFrame and insert payers
-for _, row in all_payers_df.iterrows():
-    payer_id = row["Payer ID"]
-    payer_group_name = row["Payer Group Name"]
-    payer_name = row["Payer Name"]
-    insert_payer(payer_id, payer_group_name, payer_name, conn)
+for index, row in all_payers_df.iterrows():
+    payer_group_name = row.get("Payer Group Name", "").strip()
+    payer_name = row.get("Payer Name", "").strip()
+    payer_number = str(row["Payer ID"]).strip() if pd.notna(row["Payer ID"]) else None
 
-# Commit any changes
+    if payer_group_name and payer_name and payer_number:
+        insert_payer(payer_group_name, payer_name, payer_number, conn)
+    else:
+        print(f"Skipping row {index}: Missing required data.")
+
 conn.commit()
-
-# Close the cursor and connection
 cursor.close()
 conn.close()
-print("✅ Database connection closed.")
+print("Database update completed. Connection closed.")

@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 # Load the Excel file
 xls = pd.ExcelFile("Payers.xlsx")
 
-# Define the columns to extract for each sheet
+
 sheet_info = {
     "Vyne": ("Payer Identification Information", "Payer ID"),
     "Availity": ("Payer Name", "Payer ID"),
@@ -17,22 +17,21 @@ sheet_info = {
     "Optum-all": ("Payer Name", "Payer ID")
 }
 
-# Initialize list to hold payer data
 payer_data = []
 
 
 for sheet, (payer_col, payer_id_col) in sheet_info.items():
     df = pd.read_excel(xls, sheet_name=sheet)
     
-    if payer_col in df and payer_id_col in df:  # Ensure both columns exist
+    if payer_col in df and payer_id_col in df:  
         df = df[[payer_col, payer_id_col]].dropna()
-        df.columns = ["Payer Name", "Payer ID"]  # Standardize column names
+        df.columns = ["Payer Name", "Payer ID"]  
         payer_data.append(df)
 
 all_payers_df = pd.concat(payer_data, ignore_index=True).drop_duplicates()
 
 def extract_first_two_words(text):
-    words = text.split()[:2]  # Get first two words
+    words = text.split()[:2]  
     return " ".join(words)
 
 all_payers_df["Payer Group Key"] = all_payers_df["Payer Name"].apply(extract_first_two_words)
@@ -55,12 +54,12 @@ grouped_payers = all_payers_df.groupby('Cluster')['Payer Name'].apply(list).to_d
 cluster_map = {}
 for cluster, names in grouped_payers.items():
     shortest_full_name = min(names, key=len)  # Find the shortest full name in the cluster
-    cluster_map[cluster] = shortest_full_name  # Assign shortest name as the payer group name
+    cluster_map[cluster] = shortest_full_name  
 
 
 all_payers_df['Payer Group Name'] = all_payers_df['Cluster'].map(cluster_map)
 
-all_payers_df = all_payers_df[["Payer ID", "Payer Group Name", "Payer Name"]]  # Keep only required columns
+all_payers_df = all_payers_df[["Payer ID", "Payer Group Name", "Payer Name"]] 
 all_payers_df.to_excel("payer_with_payer_group.xlsx", index=False)
 
 print("Payer groups and names saved to payer_with_payer_group.xlsx")

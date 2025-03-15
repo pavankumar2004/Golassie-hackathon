@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Payer Hierarchy</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Payer Groups Tree -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Payer Groups</h5>
+                </div>
+                <div class="card-body">
+                    <div id="payer-tree">
+                        {% for group in payer_groups %}
+                        <div class="payer-group mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-folder me-2"></i>
+                                <strong>{{ group.payer_group_name }}</strong>
+                            </div>
+                            <div class="ms-4 mt-2">
+                                {% for payer in group.payers %}
+                                <div class="payer-item">
+                                    <i class="bi bi-file-text me-2"></i>
+                                    {{ payer.payer_name }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Details Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Details</h5>
+                </div>
+                <div class="card-body" id="details-panel">
+                    Select a payer or group to view details
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+<style>
+.payer-group {
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+}
+.payer-group:hover {
+    background-color: #f8f9fa;
+}
+.payer-item {
+    cursor: pointer;
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+.payer-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle payer group clicks
+    document.querySelectorAll('.payer-group').forEach(group => {
+        group.querySelector('strong').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const groupName = this.textContent;
+            showGroupDetails(groupName);
+        });
+    });
+
+    // Handle payer clicks
+    document.querySelectorAll('.payer-item').forEach(payer => {
+        payer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const payerName = this.textContent.trim();
+            showPayerDetails(payerName);
+        });
+    });
+});
+
+function showGroupDetails(groupName) {
+    const detailsPanel = document.getElementById('details-panel');
+    detailsPanel.innerHTML = `<h4>${groupName}</h4>
+        <p>Group Details:</p>
+        <div class="loading">Loading group details...</div>`;
+}
+
+function showPayerDetails(payerName) {
+    const detailsPanel = document.getElementById('details-panel');
+    detailsPanel.innerHTML = `<h4>${payerName}</h4>
+        <p>Payer Details:</p>
+        <div class="loading">Loading payer details...</div>`;
+    
+    
+}
+</script>
+{% endblock %}

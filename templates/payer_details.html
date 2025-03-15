@@ -1,33 +1,34 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Payer Details</h2>
-
-<!-- Table for displaying payer details -->
-<table class="table">
-    <thead>
-        <tr>
-            <th>Payer Group Name</th>
-            <th>Payer Group ID</th>
-            <th>Payer Name</th>
-            <th>Payer Number</th>
-            <th>Payer Detail Name</th>
-            <th>Tax ID</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for detail in payer_details %}
-        <tr>
-            <td>{{ detail[5] }}</td>  <!-- payer_group_name -->
-            <td>{{ detail[6] }}</td>  <!-- payer_group_id -->
-            <td>{{ detail[1] }}</td>  <!-- payer_name -->
-            <td>{{ detail[2] }}</td>  <!-- payer_number -->
-            <td>{{ detail[3] }}</td>  <!-- detail_name -->
-            <td>{{ detail[4] }}</td>  <!-- tax_id -->
-            <td><a href="{{ url_for('edit_payer_detail', payer_detail_id=detail[0]) }}" class="btn btn-warning">Edit</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <h2 class="my-4">Payer Details</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Payer Group</th>
+                <th>Payer ID</th>
+                <th>Payer Name</th>
+                <th>Short Name</th>
+                <th>Tax ID</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in payer_details %}
+            <tr>
+                <td>{{ detail[5] }}</td>  <!-- payer_group_name -->
+                <td>{{ detail[1] }}</td>  <!-- payer_id -->
+                <td>{{ detail[2] }}</td>  <!-- payer_name -->
+                <td>{{ detail[3] }}</td>  <!-- short_name -->
+                <td>{{ detail[4] }}</td>  <!-- tax_id -->
+                <td>
+                    <a href="{{ url_for('edit_payer_detail', payer_detail_id=detail[0]) }}" 
+                       class="btn btn-warning btn-sm">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

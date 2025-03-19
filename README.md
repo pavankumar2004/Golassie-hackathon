@@ -2,14 +2,39 @@
 
 A Flask-based web application for managing healthcare payer information, including payer groups, payers, and payer details.
 
-## 🚀 Features
+## Approach
+1. **Data Preparation:**
+   - Extracted relevant payer data into an intermediate file with columns: `payer`, `payer_group`, and `payer_id`.
+   - Preprocessed data to remove inconsistencies and handle missing values.
 
-- DB Scan Clustering for Payer Group Clustering
-- View and manage payer groups
-- View and edit payer details
-- Fuzzy matching for payer identification
-- Database integration with PostgreSQL
-- Data extraction and clustering from multiple sources
+2. **DBSCAN Clustering for Group Identification:**
+   - Applied **DBSCAN (Density-Based Spatial Clustering of Applications with Noise)** to group similar payers based on predefined features.
+   - Chose DBSCAN due to its ability to identify arbitrary-shaped clusters and handle noise effectively.
+
+3. **Fuzzy Matching & Semantic Deduplication:**
+   - Used **fuzzy string matching** to identify near-duplicate payer names.
+   - Applied **semantic similarity techniques** to detect and merge duplicate payers across different representations.
+   - Handled variations in payer names (e.g., abbreviations, misspellings, or formatting differences).
+
+4. **Post-Clustering Refinement:**
+   - Mapped clustered results back to the intermediate file.
+   - Ensured logical groupings to maintain data integrity.
+   - Assigned `payer_group_id` to each payer based on clustering results.
+
+5. **Matching & Validation:**
+   - Matched clustered payers with existing payer groups to check for consistency.
+   - Identified and handled outliers or misclassified payers.
+   - Cross-referenced `payer_group_id` with known group structures to validate assignments.
+
+6. **Final Integration:**
+   - Validated the consistency of assigned payer groups.
+
+
+## Future Enhancements
+- Fine-tuning clustering and fuzzy matching parameters for improved accuracy.
+- Exploring advanced NLP models for better semantic matching.
+- Automating the entire pipeline for seamless integration.
+
 
 ## 🏛 Database Schema
 
